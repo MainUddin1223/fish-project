@@ -14,12 +14,181 @@ datasource db {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  name     String
-  about    String
-  img      String
-  password String
-  phone    String
+  id        Int       @id @default(autoincrement())
+  name      String
+  about     String
+  img       String
+  password  String
+  phone     String
+  leader    Leader[]
+  members   Members[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@map("user")
+}
+
+model Syndicate {
+  id             Int              @id @default(autoincrement())
+  syndicate_name String
+  location       String
+  is_paid        Boolean          @default(true)
+  leader         Leader[]
+  members        Members[]
+  careTaker      CareTaker[]
+  season         Season[]
+  sales          Sales[]
+  cost           Cost[]
+  profit_share   Profit_share[]
+  payment_record Payment_record[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@map("syndicate")
+}
+
+model Leader {
+  id           Int       @id @default(autoincrement())
+  syndicate_id Int
+  user_id      Int
+  user         User      @relation(fields: [user_id], references: [id])
+  syndicate    Syndicate @relation(fields: [syndicate_id], references: [id])
+  season       Season[]
+  sales        Sales[]
+  cost         Cost[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("leader")
+}
+
+model Members {
+  id             Int              @id @default(autoincrement())
+  syndicate_id   Int
+  user_id        Int
+  stake          Float
+  investment     Int
+  user           User             @relation(fields: [user_id], references: [id])
+  syndicate      Syndicate        @relation(fields: [syndicate_id], references: [id])
+  profit_share   Profit_share[]
+  payment_record Payment_record[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@map("members")
+}
+
+model CareTaker {
+  id           Int       @id @default(autoincrement())
+  name         String
+  phone        String
+  salary       Int
+  syndicate_id Int
+  syndicate    Syndicate @relation(fields: [syndicate_id], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("care_taker")
+}
+
+model Season {
+  id               Int              @id @default(autoincrement())
+  duration         Int
+  year             String
+  targeted_cost    Int
+  targeted_sales   Int
+  targeted_revenue Int
+  syndicate_id     Int
+  total_investment Int
+  total_sales      Int
+  leader_id        Int
+  leader           Leader           @relation(fields: [leader_id], references: [id])
+  syndicate        Syndicate        @relation(fields: [syndicate_id], references: [id])
+  sales            Sales[]
+  cost             Cost[]
+  profit_share     Profit_share[]
+  payment_record   Payment_record[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@map("season")
+}
+
+model Sales {
+  id           Int       @id @default(autoincrement())
+  total_wight  Int
+  rate         Int
+  fish_type    Fish_type
+  total_amount Int
+  season_id    Int
+  syndicate_id Int
+  leader_id    Int
+  leader       Leader    @relation(fields: [leader_id], references: [id])
+  syndicate    Syndicate @relation(fields: [syndicate_id], references: [id])
+  season       Season    @relation(fields: [season_id], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("sales")
+}
+
+model Cost {
+  id           Int       @unique @default(autoincrement())
+  date         String
+  total_cost   Int
+  reason       String
+  prove        String
+  season_id    Int
+  syndicate_id Int
+  leader_id    Int
+  leader       Leader    @relation(fields: [leader_id], references: [id])
+  syndicate    Syndicate @relation(fields: [syndicate_id], references: [id])
+  season       Season    @relation(fields: [season_id], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("cost")
+}
+
+model Profit_share {
+  id           Int       @unique @default(autoincrement())
+  member_id    Int
+  total_amount Int
+  paid_amount  Int
+  syndicate_id Int
+  season_id    Int
+  member       Members   @relation(fields: [member_id], references: [id])
+  syndicate    Syndicate @relation(fields: [syndicate_id], references: [id])
+  season       Season    @relation(fields: [season_id], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("profit_share")
+}
+
+model Payment_record {
+  id           Int       @unique @default(autoincrement())
+  member_id    Int
+  paid_amount  Int
+  syndicate_id Int
+  season_id    Int
+  payment_date DateTime  @default(now())
+  member       Members   @relation(fields: [member_id], references: [id])
+  syndicate    Syndicate @relation(fields: [syndicate_id], references: [id])
+  season       Season    @relation(fields: [season_id], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("payment_record")
+}
+
+enum Fish_type {
+  telapia
+  rui
+  catla
+  mrigel
+  pangas
+  mirka
+  carp
+  kalibaus
 }
